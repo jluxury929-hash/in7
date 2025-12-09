@@ -7,9 +7,13 @@
     "outDir": "./dist",
     "sourceMap": true,
     "esModuleInterop": true,
-    "allowJs": true,
-    "checkJs": false
+    // Setting allowJs to false ensures that only TS files are compiled 
+    // and helps enforce type safety in a TypeScript project.
+    "allowJs": false,      
+    "checkJs": false       // We are not checking existing JS files
   },
-  "include": ["index.js", "mev_backend.js", "src/**/*.js"],
+  // CRITICAL FIX: Directing the compiler to look for TypeScript files (*.ts)
+  // that contain your source code (arbitrage-bot.ts and files in src/).
+  "include": ["arbitrage-bot.ts", "src/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }
