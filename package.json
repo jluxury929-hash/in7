@@ -2,7 +2,7 @@
   "name": "massive-trading-engine-arbitrage",
   "version": "1.0.0",
   "description": "A Flash Loan Arbitrage Trading Engine.",
-  "main": "dist/arbitrage-bot.js",
+  "main": "dist/arbitrage-bot.js", /* <-- Remains correct if outDir is './dist' */
   "scripts": {
     "prebuild": "npm install --legacy-peer-deps",
     "build": "npx tsc",
