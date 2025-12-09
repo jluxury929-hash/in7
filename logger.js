@@ -1,17 +1,13 @@
-// src/utils/logger.js
-
 const winston = require('winston');
 const chalk = require('chalk');
 const fs = require('fs');
 const path = require('path');
 
-// --- Setup ---
 const logsDir = path.join(process.cwd(), 'logs');
 if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir, { recursive: true });
 }
 
-// Custom log levels and colors
 const customLevels = {
     levels: {
         error: 0,
@@ -33,7 +29,6 @@ const customLevels = {
 
 winston.addColors(customLevels.colors);
 
-// Console format with colors
 const consoleFormat = winston.format.printf(({ level, message, timestamp, ...meta }) => {
     const ts = new Date(timestamp).toLocaleString();
     let coloredLevel = level.toUpperCase();
@@ -56,7 +51,6 @@ const consoleFormat = winston.format.printf(({ level, message, timestamp, ...met
     return logMessage;
 });
 
-// --- Create Logger ---
 const logger = winston.createLogger({
     levels: customLevels.levels,
     format: winston.format.combine(
@@ -77,7 +71,6 @@ const logger = winston.createLogger({
     ]
 });
 
-// --- Exported Functions ---
 module.exports.logTrade = (data) => {
     logger.log('trade', 'Trade Execution', data);
 };
