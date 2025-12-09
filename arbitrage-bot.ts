@@ -1,20 +1,23 @@
-// arbitrage-bot.ts - Flash Loan Arbitrage Bot (Fixed for Ethers v5)
+// src/arbitrage-bot.ts - Flash Loan Arbitrage Bot
 
-import { ethers } from 'ethers'; // Ethers v5 requires namespace access
+import { ethers } from 'ethers';
 import * as dotenv from 'dotenv';
-import { logTrade, logError, logInfo, logSuccess, logWarning } from './src/utils/logger'; 
-import { TradeLogger, TradeRecord } from './src/utils/tradeLogger'; 
+// FIX: Relative path from src/ to utils/
+import { logTrade, logError, logInfo, logSuccess, logWarning } from './utils/logger'; 
+import { TradeLogger, TradeRecord } from './utils/tradeLogger'; 
 import * as path from 'path';
 
 // Load environment variables
-dotenv.config();
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 // ============ CONFIGURATION ============
+// NOTE: Replace with the address of your deployed Flash Loan Arbitrage Smart Contract
 const YOUR_CONTRACT_ADDRESS = '0x83EF5c401fAa5B9674BAfAcFb089b30bAc67C9A0';
-const MIN_PROFIT_PERCENT = 0.15;
+// Minimum acceptable profit percentage after fees (e.g., 0.15% profit required)
+const MIN_PROFIT_PERCENT = 0.15; 
 const MAX_GAS_COST_GWEI = 50n;
 
-// ============ INTERFACES (omitted for brevity) ============
+// ============ INTERFACES ============
 interface ChainConfig {
     name: string;
     rpcHttp: string;
@@ -43,14 +46,14 @@ interface Opportunity {
     id: string;
     tokenA: TokenConfig;
     tokenB: TokenConfig;
-    buyDex: string; 
-    sellDex: string; 
+    buyDex: string; // Router address
+    sellDex: string; // Router address
     buyDexName: string;
     sellDexName: string;
     profitPercent: number;
-    estimatedProfit: ethers.BigNumber;
-    borrowAmount: ethers.BigNumber;
-    pairBorrow: string;
+    estimatedProfit: ethers.BigNumber; // Ethers V5 BigNumber
+    borrowAmount: ethers.BigNumber; // Ethers V5 BigNumber
+    pairBorrow: string; // DEX Pair Address (for V2 style flash loan reference)
 }
 
 // ============ CHAIN CONFIGS (Ethers V5 compatible) ============
@@ -60,7 +63,6 @@ const POLYGON_CONFIG: ChainConfig = {
     rpcWss: process.env.POLYGON_WSS || 'wss://polygon-bor.publicnode.com',
     chainId: 137,
     gasToken: 'MATIC',
-    // FIX: Using ethers.utils namespace
     maxPriorityFee: ethers.utils.parseUnits(MAX_GAS_COST_GWEI.toString(), 'gwei').toBigInt(),
     minBalance: '0.5',
     
@@ -81,7 +83,6 @@ const BSC_CONFIG: ChainConfig = {
     rpcWss: process.env.BSC_WSS || 'wss://bsc-ws-node.nariox.org',
     chainId: 56,
     gasToken: 'BNB',
-    // FIX: Using ethers.utils namespace
     maxPriorityFee: ethers.utils.parseUnits('3', 'gwei').toBigInt(), 
     minBalance: '0.002',
     
@@ -98,8 +99,7 @@ const BSC_CONFIG: ChainConfig = {
 
 // ============ BOT CLASS ============
 class FlashLoanArbitrageBot {
-    // FIX: Using ethers.providers namespace
-    private provider: ethers.providers.JsonRpcProvider; 
+    private provider: ethers.providers.JsonRpcProvider;
     private wsProvider: ethers.providers.WebSocketProvider;
     private wallet: ethers.Wallet;
     private config: ChainConfig;
@@ -123,7 +123,7 @@ class FlashLoanArbitrageBot {
     
     constructor(config: ChainConfig, privateKey: string) {
         this.config = config;
-        // FIX: Using ethers.providers namespace
+        // Ethers v5 Providers
         this.provider = new ethers.providers.JsonRpcProvider(config.rpcHttp);
         this.wsProvider = new ethers.providers.WebSocketProvider(config.rpcWss);
         this.wallet = new ethers.Wallet(privateKey, this.provider);
@@ -148,7 +148,6 @@ class FlashLoanArbitrageBot {
         this.scanContinuously();
         
         this.contract.on('ArbitrageExecuted', (tokenBorrowed, amount, profit, dexBuy, dexSell, event) => {
-            // FIX: Using ethers.utils namespace
             logSuccess('PROFIT MADE!', {
                 profit: ethers.utils.formatUnits(profit, this.config.tokens.find(t => t.address === tokenBorrowed)?.decimals || 18),
                 txHash: event.transactionHash
@@ -160,9 +159,8 @@ class FlashLoanArbitrageBot {
         logInfo('Verifying setup...');
         
         const balance = await this.provider.getBalance(this.wallet.address);
-        // FIX: Using ethers.utils namespace
+        // Ethers v5 utils
         const balanceFormatted = ethers.utils.formatEther(balance);
-        // FIX: Using ethers.utils namespace
         const minBalance = ethers.utils.parseEther(this.config.minBalance);
         
         logInfo(`Wallet Balance: ${balanceFormatted} ${this.config.gasToken}`);
@@ -212,7 +210,7 @@ class FlashLoanArbitrageBot {
     }
     
     private async findArbitrage(tokenA: TokenConfig, tokenB: TokenConfig): Promise<Opportunity[]> {
-        // FIX: Using ethers.utils namespace
+        // Ethers v5 utils
         const baseBorrowAmount = ethers.utils.parseUnits('100', tokenA.decimals);
         
         const opportunities: Opportunity[] = [];
@@ -227,7 +225,7 @@ class FlashLoanArbitrageBot {
                 const router = new ethers.Contract(dex.router, this.ROUTER_ABI, this.provider);
                 const factory = new ethers.Contract(dex.factory, this.FACTORY_ABI, this.provider);
                 
-                // FIX: Using ethers.constants namespace for ZeroAddress
+                // Ethers v5 constants
                 const pairAddress = await factory.getPair(tokenA.address, tokenB.address);
                 if (pairAddress === ethers.constants.AddressZero) continue;
                 
@@ -259,12 +257,12 @@ class FlashLoanArbitrageBot {
                     
                     const flashLoanFeeBasisPoints = 9n;
                     const multiplier = 10000n + flashLoanFeeBasisPoints;
-                    const repayAmount = amountAOut.mul(multiplier).div(10000); // Should be baseBorrowAmount.mul(multiplier).div(10000)
+                    const repayAmount = baseBorrowAmount.mul(multiplier).div(10000); 
                     
-                    const profit = amountAOut.sub(baseBorrowAmount.mul(multiplier).div(10000));
+                    const profit = amountAOut.sub(repayAmount);
                     
                     if (profit.gt(ethers.constants.Zero)) {
-                        // FIX: Using ethers.utils namespace
+                        // Ethers v5 utils
                         const profitInTokenA = Number(ethers.utils.formatUnits(profit, tokenA.decimals));
                         const profitPercent = (profitInTokenA / Number(ethers.utils.formatUnits(baseBorrowAmount, tokenA.decimals))) * 100;
 
@@ -303,12 +301,11 @@ class FlashLoanArbitrageBot {
             timestamp: Date.now(),
             blockNumber: 0,
             status: 'pending',
-            // FIX: Using ethers.utils namespace
+            // Ethers v5 utils
             tokenA: { symbol: opp.tokenA.symbol, address: opp.tokenA.address, amount: ethers.utils.formatUnits(opp.borrowAmount, opp.tokenA.decimals) },
             tokenB: { symbol: opp.tokenB.symbol, address: opp.tokenB.address, amount: '0' },
             buyDex: opp.buyDexName,
             sellDex: opp.sellDexName,
-            // FIX: Using ethers.utils namespace
             borrowAmount: ethers.utils.formatUnits(opp.borrowAmount, opp.tokenA.decimals),
             expectedProfit: ethers.utils.formatUnits(opp.estimatedProfit, opp.tokenA.decimals),
         };
@@ -347,10 +344,9 @@ class FlashLoanArbitrageBot {
                 this.tradeLogger.logTrade({
                     ...tradeRecord,
                     status: 'success',
-                    // FIX: Using ethers.utils namespace
+                    // Ethers v5 utils
                     actualProfit: ethers.utils.formatUnits(actualProfit, opp.tokenA.decimals),
                     netProfit: ethers.utils.formatUnits(actualProfit.sub(receipt.gasUsed!.mul(maxFee)), opp.tokenA.decimals),
-                    // FIX: Using ethers.utils namespace
                     gasCost: ethers.utils.formatEther(receipt.gasUsed!.mul(maxFee)),
                     txHash: receipt.transactionHash,
                     blockNumber: receipt.blockNumber,
@@ -364,7 +360,6 @@ class FlashLoanArbitrageBot {
                     error: 'Transaction reverted on chain',
                     txHash: receipt.transactionHash,
                     blockNumber: receipt.blockNumber,
-                    // FIX: Using ethers.utils namespace
                     gasCost: ethers.utils.formatEther(receipt.gasUsed!.mul(maxFee)),
                 });
             }
