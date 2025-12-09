@@ -1,40 +1,31 @@
 {
-  "name": "flash-loan-arbitrage-bot",
-  "version": "2.0.0",
-  "description": "Flash Loan Arbitrage Bot optimized for 0.001 ETH minimum balance",
-  "main": "dist/bot.js",
+  "name": "massive-trading-engine-flashbots",
+  "version": "1.0.0",
+  "description": "A Flashbots-integrated MEV trading engine with Flash Loan Arbitrage Bot.",
+  "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/bot.js",
-    "dev": "ts-node src/bot.ts",
-    "dev:watch": "nodemon --exec ts-node src/bot.ts",
-    "clean": "rm -rf dist logs",
+    "prebuild": "npm install",
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "npm run build && npm start",
+    "bot": "npm run build && node dist/arbitrage-bot.js",
+    "bot:dev": "npx ts-node arbitrage-bot.ts",
     "logs": "tail -f logs/combined.log",
     "trades": "tail -f logs/trades.log"
   },
-  "keywords": [
-    "arbitrage",
-    "flash-loan",
-    "defi",
-    "ethereum",
-    "polygon",
-    "bsc"
-  ],
-  "author": "Your Name",
-  "license": "MIT",
   "dependencies": {
     "ethers": "^6.9.0",
-    "dotenv": "^16.3.1",
+    "@flashbots/ethers-provider-bundle": "^0.5.0",
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5",
     "winston": "^3.11.0",
     "chalk": "^4.1.2"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "typescript": "^5.3.2",
-    "ts-node": "^10.9.1",
-    "nodemon": "^3.0.2"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "typescript": "^5.4.5",
+    "@types/node": "^20.12.7",
+    "@types/express": "^4.17.21",
+    "ts-node": "^10.9.1"
   }
 }
+
