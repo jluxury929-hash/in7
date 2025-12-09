@@ -3,13 +3,14 @@
     "target": "es2020",
     "module": "commonjs",
     "moduleResolution": "node",
-    "rootDir": ".",
-    "outDir": "./dist",
+    "rootDir": "./src",      /* <-- FIX: Source files start here */
+    "outDir": "./dist",      /* <-- Target output is dist/ at project root */
     "sourceMap": true,
     "esModuleInterop": true,
-    "allowJs": true,       /* <-- FIX: MUST be true to read .js utility files */
-    "checkJs": true        /* <-- FIX: Recommended for safety */
+    "allowJs": true,
+    "checkJs": true
   },
-  "include": ["arbitrage-bot.ts", "src/**/*.ts", "src/**/*.js"], /* <-- Including .js files for completeness */
+  /* FIX: Now include all TS and JS files within the source root */
+  "include": ["src/**/*.ts", "src/**/*.js"], 
   "exclude": ["node_modules", "dist"]
 }
