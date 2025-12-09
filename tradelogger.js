@@ -1,10 +1,7 @@
-// src/utils/tradeLogger.js
-
 const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 
-// --- Class ---
 class TradeLogger {
     constructor() {
         const logsDir = path.join(process.cwd(), 'logs');
@@ -17,7 +14,6 @@ class TradeLogger {
         this.tradesFile = path.join(logsDir, `trades-${today}.json`);
         this.csvFile = path.join(logsDir, `trades-${today}.csv`);
         
-        // Initialize CSV file with headers if it doesn't exist
         if (!fs.existsSync(this.csvFile)) {
             const headers = 'Timestamp,Trade ID,Status,Token A,Token B,Buy DEX,Sell DEX,Borrow Amount,Expected Profit,Actual Profit,Gas Cost,Net Profit,TX Hash,Block\n';
             fs.writeFileSync(this.csvFile, headers);
@@ -35,7 +31,6 @@ class TradeLogger {
         
         if (fs.existsSync(this.tradesFile)) {
             try {
-                // Read and parse all existing trades
                 trades = JSON.parse(fs.readFileSync(this.tradesFile, 'utf8'));
             } catch (e) {
                 console.error(chalk.red('Error reading trades JSON file:'), e.message);
@@ -43,7 +38,6 @@ class TradeLogger {
             }
         }
         
-        // Find existing trade by ID and replace/update, otherwise push new trade
         const existingIndex = trades.findIndex(t => t.id === trade.id);
         if (existingIndex !== -1) {
             trades[existingIndex] = trade;
@@ -55,7 +49,7 @@ class TradeLogger {
     }
     
     appendToCsvFile(trade) {
-        if (trade.status !== 'success' && trade.status !== 'failed') return; // Only log final statuses to CSV
+        if (trade.status !== 'success' && trade.status !== 'failed') return;
         
         const line = [
             new Date(trade.timestamp).toISOString(),
@@ -74,7 +68,6 @@ class TradeLogger {
             trade.blockNumber || 'N/A'
         ].map(item => `"${String(item).replace(/"/g, '""')}"`).join(',');
         
-        // Append line ending with newline character
         fs.appendFileSync(this.csvFile, line + '\n');
     }
 
@@ -92,5 +85,4 @@ class TradeLogger {
     }
 }
 
-// Use module.exports for CommonJS compatibility
 module.exports.TradeLogger = TradeLogger;
