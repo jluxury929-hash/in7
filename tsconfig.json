@@ -3,14 +3,13 @@
     "target": "es2020",
     "module": "commonjs",
     "moduleResolution": "node",
-    "rootDir": "./src",      /* <-- FIX: Source files start here */
-    "outDir": "./dist",      /* <-- Target output is dist/ at project root */
+    "rootDir": "./src",      
+    "outDir": "./dist",      
     "sourceMap": true,
     "esModuleInterop": true,
     "allowJs": true,
     "checkJs": true
   },
-  /* FIX: Now include all TS and JS files within the source root */
   "include": ["src/**/*.ts", "src/**/*.js"], 
   "exclude": ["node_modules", "dist"]
 }
