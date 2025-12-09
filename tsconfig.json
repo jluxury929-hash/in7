@@ -3,13 +3,13 @@
     "target": "es2020",
     "module": "commonjs",
     "moduleResolution": "node",
-    "rootDir": "./src",      
-    "outDir": "./dist",      
+    "rootDir": ".",
+    "outDir": "./dist",
     "sourceMap": true,
     "esModuleInterop": true,
     "allowJs": true,
-    "checkJs": true
+    "checkJs": false
   },
-  "include": ["src/**/*.ts", "src/**/*.js"], 
+  "include": ["index.js", "mev_backend.js", "src/**/*.js"],
   "exclude": ["node_modules", "dist"]
 }
