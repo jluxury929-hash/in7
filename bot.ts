@@ -577,4 +577,67 @@ class FlashLoanArbitrageBot {
                 console.log(chalk.green(`   Block: ${receipt.blockNumber}`));
                 console.log(chalk.
 
-     
+// ============ MAIN ============
+async function main() {
+    console.log(chalk.cyan.bold('\n🚀 Flash Loan Arbitrage Bot - Ultra Low Capital Edition\n'));
+    
+    // Get private key from environment
+    const privateKey = process.env.PRIVATE_KEY;
+    if (!privateKey) {
+        console.log(chalk.red('❌ ERROR: PRIVATE_KEY not found in .env file\n'));
+        console.log(chalk.yellow('Create a .env file with:'));
+        console.log(chalk.yellow('PRIVATE_KEY=your_wallet_private_key_here\n'));
+        process.exit(1);
+    }
+    
+    // Select chain
+    const chain = process.env.CHAIN || 'POLYGON';
+    let config: ChainConfig;
+    
+    switch (chain.toUpperCase()) {
+        case 'POLYGON':
+            config = POLYGON_CONFIG;
+            break;
+        case 'BSC':
+            config = BSC_CONFIG;
+            break;
+        case 'ARBITRUM':
+            config = ARBITRUM_CONFIG;
+            break;
+        default:
+            console.log(chalk.red(`❌ Unknown chain: ${chain}`));
+            console.log(chalk.yellow('Available chains: POLYGON, BSC, ARBITRUM\n'));
+            process.exit(1);
+    }
+    
+    console.log(chalk.blue(`Selected chain: ${config.name}\n`));
+    
+    // Create and start bot
+    const bot = new FlashLoanArbitrageBot(config, privateKey);
+    
+    // Handle shutdown gracefully
+    process.on('SIGINT', () => {
+        console.log(chalk.yellow('\n\n🛑 Shutting down...\n'));
+        bot.stop();
+        process.exit(0);
+    });
+    
+    process.on('SIGTERM', () => {
+        console.log(chalk.yellow('\n\n🛑 Shutting down...\n'));
+        bot.stop();
+        process.exit(0);
+    });
+    
+    // Start the bot
+    await bot.start();
+}
+
+// Run the bot
+main().catch((error) => {
+    console.error(chalk.red('\n❌ Fatal error:\n'), error);
+    logError('Fatal error in main', error);
+    process.exit(1);
+});
+
+export default FlashLoanArbitrageBot;
+
