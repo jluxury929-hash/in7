@@ -1,0 +1,40 @@
+{
+  "name": "flash-loan-arbitrage-bot",
+  "version": "2.0.0",
+  "description": "Flash Loan Arbitrage Bot optimized for 0.001 ETH minimum balance",
+  "main": "dist/bot.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/bot.js",
+    "dev": "ts-node src/bot.ts",
+    "dev:watch": "nodemon --exec ts-node src/bot.ts",
+    "clean": "rm -rf dist logs",
+    "logs": "tail -f logs/combined.log",
+    "trades": "tail -f logs/trades.log"
+  },
+  "keywords": [
+    "arbitrage",
+    "flash-loan",
+    "defi",
+    "ethereum",
+    "polygon",
+    "bsc"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.9.0",
+    "dotenv": "^16.3.1",
+    "winston": "^3.11.0",
+    "chalk": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.2",
+    "ts-node": "^10.9.1",
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
