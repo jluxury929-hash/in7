@@ -1,31 +1,23 @@
 {
   "name": "massive-trading-engine-flashbots",
   "version": "1.0.0",
-  "description": "A Flashbots-integrated MEV trading engine with Flash Loan Arbitrage Bot.",
+  "description": "A Flashbots-integrated MEV trading engine.",
   "main": "index.js",
   "scripts": {
     "prebuild": "npm install",
     "build": "npx tsc",
     "start": "node dist/index.js",
-    "dev": "npm run build && npm start",
-    "bot": "npm run build && node dist/arbitrage-bot.js",
-    "bot:dev": "npx ts-node arbitrage-bot.ts",
-    "logs": "tail -f logs/combined.log",
-    "trades": "tail -f logs/trades.log"
+    "dev": "npm run build && npm start"
   },
   "dependencies": {
-    "ethers": "^6.9.0",
+    "ethers": "^5.7.2",
     "@flashbots/ethers-provider-bundle": "^0.5.0",
     "express": "^4.19.2",
-    "dotenv": "^16.4.5",
-    "winston": "^3.11.0",
-    "chalk": "^4.1.2"
+    "dotenv": "^16.4.5"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
     "@types/node": "^20.12.7",
-    "@types/express": "^4.17.21",
-    "ts-node": "^10.9.1"
+    "@types/express": "^4.17.21"
   }
 }
-
